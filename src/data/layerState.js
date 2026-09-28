@@ -547,6 +547,11 @@ export const LAYER_STATE_TOKEN_RESERVATIONS =
  */
 export const LAYER_STATE_REGISTRY = Object.freeze([
   Object.freeze({
+    id: 'air-quality',
+    token: '3',
+    disposition: 'enabled-only',
+  }),
+  Object.freeze({
     id: 'ais-live-vessels',
     token: 'a',
     disposition: 'enabled-only',
