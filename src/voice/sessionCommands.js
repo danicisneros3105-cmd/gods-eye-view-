@@ -1,5 +1,12 @@
 import { createVoiceControl } from './control.js';
 import { createVoiceSession } from './session.js';
+import {
+  bindVoiceInactivitySettings,
+  createVoiceInactivityController,
+} from './inactivity.js';
+
+const DEFAULT_ERROR_HINT =
+  'Check microphone permission and network access, then try again.';
 
 /** Bind common controls to a supplied voice-session adapter. */
 export function createVoiceCommands({
@@ -12,8 +19,14 @@ export function createVoiceCommands({
   signal,
   debugSink,
   createControl = createVoiceControl,
+  resetExisting = true,
+  provider,
+  onProviderChange,
+  onSessionEvent,
+  storage,
+  voiceSettingsOpen = false,
 }) {
-  window.__gevVoiceCommands?.stop?.({ removeUi: true });
+  if (resetExisting) window.__gevVoiceCommands?.stop?.({ removeUi: true });
   const ui = createControl({ reset: true });
   const session = createVoiceSession({
     runner,
@@ -32,8 +45,32 @@ export function createVoiceCommands({
   });
   const adapter = session.adapter;
   const capabilities = adapter.capabilities || {};
+  let settingsUnsubscribe;
+  const inactivity = createVoiceInactivityController({
+    session,
+    onExpire: () => settingsUnsubscribe?.setOpen?.(false),
+  });
+  const inactivityUnsubscribe = session.subscribe((event) =>
+    inactivity.handleEvent(event),
+  );
+  settingsUnsubscribe = bindVoiceInactivitySettings({
+    ui,
+    storage,
+    controller: inactivity,
+    initialOpen: voiceSettingsOpen,
+  });
+  if (ui.providerLimitNote)
+    ui.providerLimitNote.textContent = capabilities.advisoryLimit || '';
+  const providerHandler = () => onProviderChange?.(ui.providerSelect.value);
+  if (ui.providerField) ui.providerField.hidden = !onProviderChange;
+  if (ui.providerSelect && onProviderChange) {
+    ui.providerSelect.value = provider;
+    ui.root.dataset.provider = provider;
+    ui.providerSelect.addEventListener('change', providerHandler);
+  }
   if (ui.tierButton) ui.tierButton.hidden = !capabilities.costControls;
   if (ui.costValue) ui.costValue.hidden = !capabilities.costControls;
+  if (ui.costSettings) ui.costSettings.hidden = !capabilities.costControls;
   if (!capabilities.pushToTalk) {
     ui.button.setAttribute('aria-label', 'Toggle voice control');
     if (ui.helpDetail) ui.helpDetail.textContent = 'Activate to toggle voice';
@@ -41,7 +78,15 @@ export function createVoiceCommands({
   // Retain the existing controller's inspection surface for browser tools.
   const controls = adapter.controller || session;
   controls.session = session;
+  controls.ui = ui;
+  controls.setVoiceSettingsOpen = (open) =>
+    settingsUnsubscribe.setOpen?.(open) ?? false;
+  controls.setVoiceInactivityMinutes = (minutes) =>
+    settingsUnsubscribe.setPreference?.(minutes) ?? false;
+  controls.getVoiceInactivityMinutes = () =>
+    settingsUnsubscribe.getPreference?.();
   const updateStatus = session.subscribe((event) => {
+    onSessionEvent?.(event);
     if (event.type !== 'state') return;
     ui.root.dataset.status = event.state;
     ui.status.textContent =
@@ -54,6 +99,11 @@ export function createVoiceCommands({
         event.state === 'error'
           ? event.detail || 'Voice could not be started.'
           : '';
+    if (ui.errorHint)
+      ui.errorHint.textContent =
+        event.state === 'error' && event.recovery
+          ? event.recovery
+          : DEFAULT_ERROR_HINT;
     if (event.state === 'error') ui.root.classList?.remove('error-dismissed');
   });
   const annotationUnsubscribe = annotations?.onOutlineEvent?.((event) => {
@@ -61,24 +111,36 @@ export function createVoiceCommands({
   });
   const buttonHandler = () => {
     if (adapter.ignoreButtonClick?.()) return;
-    if (session.isActive()) session.stop();
-    else void session.start({ pushToTalk: false });
+    if (session.isActive()) {
+      settingsUnsubscribe.setOpen?.(false);
+      session.stop();
+    } else void session.start({ pushToTalk: false });
   };
   ui.button.addEventListener('click', buttonHandler);
   session.signal.addEventListener(
     'abort',
     () => {
       ui.button.removeEventListener('click', buttonHandler);
+      ui.providerSelect?.removeEventListener('change', providerHandler);
+      settingsUnsubscribe();
+      inactivityUnsubscribe();
+      inactivity.destroy();
       annotationUnsubscribe?.();
       updateStatus();
+      ui.providerField?.remove?.();
       ui.root.remove();
     },
     { once: true },
   );
   if (session.disposed) {
     ui.button.removeEventListener('click', buttonHandler);
+    ui.providerSelect?.removeEventListener('change', providerHandler);
+    settingsUnsubscribe();
+    inactivityUnsubscribe();
+    inactivity.destroy();
     annotationUnsubscribe?.();
     updateStatus();
+    ui.providerField?.remove?.();
     ui.root.remove();
   } else adapter.bindControls?.();
   window.__gevVoiceCommands = controls;

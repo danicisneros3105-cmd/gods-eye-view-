@@ -1,5 +1,37 @@
 # Changelog
 
+- Add a shared-surface Voice Settings popup with a browser-local inactivity timeout, five-minute default, validated custom range, pending speech/tool protection, full cleanup on expiry and no share-link serialization. Both voice providers can open and close the popup and select presets, custom minutes, or None by voice; turning voice off from the mic control closes the popup. While listening, the voice control hides the redundant AI AGENT kicker and leaves the live LISTENING state visible.
+
+- Give the Cyber mic control a visible inset keyboard-focus frame and a brighter mic icon so Tab and Shift+Tab navigation remain clear inside its clipped chamfered button.
+
+- Add Gemini Live as a selectable voice provider alongside OpenAI, using the
+  same map actions, click-to-talk and Space push-to-talk controls. Add a separate
+  Gemini API key created in Google AI Studio in Provider Settings; the server keeps it
+  private and issues a short-lived token for the browser. Gemini defaults to
+  `gemini-3.8-live`, reports connection and quota failures, and releases audio
+  and pending actions when stopped or switched. OpenAI retains its model tiers
+  and spend cap; Gemini uses the project's provider quotas without an in-app
+  spend meter or cap. AI HUD summaries continue to use OpenAI.
+  Gemini Space-started sessions use explicit speech start/end markers, with
+  the input mode locked into the server-issued token. Releasing Space flushes
+  buffered microphone audio before ending the turn; click-started sessions
+  retain automatic speech detection. Cancelling a Gemini tool revokes only
+  that call's Radio work; unrelated calls keep their prepared playback and
+  reservations. New user activity and explicit Radio stop still cancel the
+  previous handoff. Voice panel routing keeps the right-rail **Display**
+  controls separate from the bottom **Visual Presets** tray, and routes
+  **Display** and **Radio** to their cockpit-specific controls while Cockpit is
+  active. Voice can open or close **POWER UP / Provider Settings** and request
+  an OpenAI/Gemini provider change; an active reply finishes before the new
+  provider is mounted. A voice-started Radio handoff now carries a one-use
+  resume lease: pausing or disabling that same Radio session restarts the prior
+  voice mode, while manual Radio playback, ordinary voice stops, provider
+  changes, and teardown never auto-resume voice. Gemini's 60-second new-session
+  window and configured 30-minute token expiry are separate from Google's
+  roughly 10-minute Live connection lifetime. On `goAway`, Gemini voice cleans
+  up locally and asks for an explicit restart, which mints a fresh token and
+  begins a new conversation; this version does not resume automatically.
+
 - Public Overpass instances are no longer used by default. Street Traffic
   roads come from TomTom flow tiles, OpenFreeMap vector tiles, or both, chosen
   on the layer row (TomTom / OSM / Hybrid) or with `?trafficRoads=`. With a
@@ -155,6 +187,14 @@
   panel method.
 - On phones the title bar sits 16 px from the top so both Radio broadcast
   waves stay on-screen.
+- Keep Cyber Voice help/error popups and Location/Visual Presets pins clear of
+  their decorative frames. Leave space above attribution for its full logo row.
+  Add shared panel surface hooks for theme styling, rail input and bounded body
+  scrolling without changing panel disclosure or visibility policies.
+- Restore the user's previous visual preset when they explicitly switch from
+  Cyber to another HUD layout, without overriding scene or shared-link state.
+- Move the aligned Cyber side-panel rails upward on desktop so the left stack
+  clears the lower coordinate card; keep Cockpit's independent visor layout.
 - Keep Cyber right-rail panels mutually exclusive and Display, CCTV and Context
   headers and frames fixed during content scrolling. Restore Radio's nested Context placement and compact
   player. Add Cyber Sonar voice controls with settings and effect-state readback.
@@ -324,6 +364,7 @@
 Add feed provenance to analyst/view answers and HUD context while retaining existing response fields and runner ownership (Matt Van Horn, #347).
 
 Analyst records for loaded satellites, datacenters and dams, with explicit bounded count/rank coverage (Matt Van Horn, #351).
+
 - New Fire Perimeters layer (Events group): live NIFC WFIGS interagency
   wildfire incident perimeters as ground-clamped polygons with a
   containment-colored fire line, refreshed every 5 minutes from the public
@@ -599,7 +640,6 @@ This changelog records public product changes. For the authoritative description
 of current runtime behavior, see [`docs/CURRENT-STATE.md`](docs/CURRENT-STATE.md).
 
 ## [Unreleased]
-
 
 - Add ECMWF IFS model selection to Wind (#464, thanks @beneduzi), with model-scoped forecast-step caches, cancellation of replaced requests, and separate issue/valid timestamps.
 

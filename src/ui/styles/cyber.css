@@ -185,6 +185,11 @@
     0 8px 20px rgba(0, 0, 0, 0.28);
 }
 
+/* Compact Cyber rails must wrap multi-word actions within their own button. */
+:root[data-ui-theme='cyber'] #scene-panel .scene-controls .scene-btn {
+  white-space: normal;
+}
+
 /* Carry the raised voice-module silhouette across the primary panel system.
    The six-pixel calibration bay is decorative and stays outside panel content. */
 :root[data-ui-theme='cyber']
@@ -920,11 +925,139 @@
   right: 0.75rem;
 }
 
+/* The standard HUD uses a compact icon-only provider row. Cyber retains the
+   labeled console treatment and its wider Voice heading. */
+:root[data-ui-theme='cyber'] .gev-voice-provider-field,
+:root[data-ui-theme='cyber'] #command-dock > .gev-voice-provider-field {
+  width: min(300px, calc(100vw - 2rem));
+  gap: 10px;
+  padding: 12px;
+}
+
+:root[data-ui-theme='cyber']
+  .gev-voice-provider-field[data-panel-surface]::before {
+  border-color: var(--glass-border);
+  background-color: var(--glass-bg);
+  background-image: var(--panel-surface-detail);
+  box-shadow: var(--panel-surface-shadow);
+}
+
+:root[data-ui-theme='cyber']
+  .gev-voice-provider-field
+  .gev-voice-provider-header {
+  display: flex;
+}
+
+:root[data-ui-theme='cyber']
+  .gev-voice-provider-controls
+  .panel-surface-control {
+  border-color: var(--glass-border);
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+:root[data-ui-theme='cyber'] .gev-voice-provider-controls[data-panel-body] {
+  padding: 3px;
+}
+
+:root[data-ui-theme='cyber']
+  .gev-voice-provider-controls
+  .panel-surface-control:hover:not(:disabled):not([aria-disabled='true']) {
+  border-color: var(--glass-border-hover);
+  background: var(--accent-dim);
+  color: var(--text-primary);
+}
+
+:root[data-ui-theme='cyber'] .gev-voice-settings-button {
+  width: auto;
+  min-width: 0;
+  padding: 5px 8px;
+  aspect-ratio: auto;
+}
+
+:root[data-ui-theme='cyber'] .gev-voice-settings-icon {
+  display: none;
+  color: inherit;
+}
+
+:root[data-ui-theme='cyber'] .gev-voice-settings-label {
+  display: inline;
+}
+
+:root[data-ui-theme='cyber']
+  .gev-voice-settings-panel[data-panel-popup]::before {
+  border-color: rgba(196, 84, 84, 0.58);
+  background-color: rgba(24, 34, 38, 0.98);
+  background-image: var(--panel-surface-detail);
+  box-shadow: var(--panel-surface-shadow);
+}
+
+:root[data-ui-theme='cyber'] .gev-voice-inactivity-chip span,
+:root[data-ui-theme='cyber'] .gev-voice-inactivity-custom {
+  border-color: rgba(112, 145, 153, 0.34);
+  background: rgba(8, 13, 15, 0.42);
+}
+
+:root[data-ui-theme='cyber'] .gev-voice-inactivity-chip:hover span {
+  color: var(--text-primary);
+  border-color: rgba(196, 84, 84, 0.58);
+  background: rgba(196, 84, 84, 0.1);
+}
+
+:root[data-ui-theme='cyber'] .gev-voice-inactivity-chip input:checked + span {
+  color: var(--cyber-red-bright);
+  border-color: rgba(196, 84, 84, 0.72);
+  background: rgba(196, 84, 84, 0.16);
+  box-shadow: 3px 0 0 rgba(196, 84, 84, 0.52) inset;
+}
+
+:root[data-ui-theme='cyber']
+  :is(.gev-voice-inactivity-custom-heading output, .gev-voice-cost-value) {
+  color: var(--cyber-red-bright);
+}
+
+:root[data-ui-theme='cyber'] .gev-voice-cost-settings {
+  border-top-color: rgba(196, 84, 84, 0.34);
+}
+
+/* Cyber's labeled provider row is taller than the standard compact row. */
+:root[data-ui-theme='cyber']
+  #command-dock
+  #gev-voice-control[data-provider]
+  .gev-voice-help-tray {
+  bottom: calc(100% + 7.25rem);
+}
+
+:root[data-ui-theme='cyber']
+  #command-dock.dock-has-pinned-tray
+  #gev-voice-control[data-provider]
+  .gev-voice-help-tray {
+  bottom: calc(100% + 8.25rem + var(--dock-pinned-stack-height));
+}
+
 :root[data-ui-theme='cyber'] #command-dock > #gev-voice-control {
   --cyber-voice-wave: 105, 203, 209;
   --cyber-voice-peak: 226, 240, 240;
   --cyber-voice-alert: 196, 84, 84;
-  border-color: rgba(196, 84, 84, 0.58);
+  /* Popups extend above this root. Only its decorative layer may be clipped. */
+  isolation: isolate;
+  overflow: visible;
+  clip-path: none;
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:root[data-ui-theme='cyber'] #command-dock > #gev-voice-control::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid rgba(196, 84, 84, 0.58);
   border-radius: 0;
   background:
     linear-gradient(180deg, rgba(196, 84, 84, 0.14), transparent 34%),
@@ -962,6 +1095,36 @@
     0 100%,
     0 8px
   );
+}
+
+/* The button's chamfer clips the shared outer focus shadow, so keep the
+   keyboard cue inside the control and brighten the mic itself. */
+:root[data-ui-theme='cyber'] #command-dock #gev-voice-button:focus-visible {
+  outline: 2px solid var(--cyber-red-bright) !important;
+  outline-offset: -3px;
+  box-shadow:
+    0 0 0 3px rgba(196, 84, 84, 0.14) inset,
+    0 0 0.85rem rgba(196, 84, 84, 0.22);
+}
+
+:root[data-ui-theme='cyber']
+  #command-dock
+  #gev-voice-button:focus-visible
+  .gev-mic-orbit {
+  border-color: var(--cyber-red-bright);
+  background: rgba(196, 84, 84, 0.24);
+  box-shadow:
+    0 0 0 0.18rem rgba(196, 84, 84, 0.16),
+    0 0 1rem rgba(196, 84, 84, 0.44);
+}
+
+:root[data-ui-theme='cyber']
+  #command-dock
+  #gev-voice-button:focus-visible
+  .gev-mic-orbit
+  img {
+  filter: none;
+  opacity: 1;
 }
 
 :root[data-ui-theme='cyber'] #command-dock .gev-mic-orbit {
@@ -1192,8 +1355,30 @@
 
 :root[data-ui-theme='cyber'] #command-dock .dock-popover-content {
   padding-top: 1.65rem;
-  border: 1px solid rgba(196, 84, 84, 0.62);
+  /* The pin straddles the tray edge; keep it outside the decorative mask. */
+  isolation: isolate;
+  clip-path: none;
+  border-color: transparent;
   border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:root[data-ui-theme='cyber']
+  #command-dock
+  :is(#location-bar, #control-panel)
+  .dock-popover-content::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: auto;
+  height: auto;
+  transform: none;
+  pointer-events: none;
+  border: 1px solid rgba(196, 84, 84, 0.62);
   background:
     linear-gradient(135deg, rgba(62, 86, 94, 0.22), transparent 46%),
     linear-gradient(rgba(188, 211, 218, 0.045) 1px, transparent 1px),
@@ -1456,6 +1641,12 @@
   bottom: calc(2vh + 6.5rem);
 }
 
+/* Attribution's logo row extends above its text baseline. Reserve the whole
+   row plus a gap above the dock-relative 2vh + 5rem credit position. */
+#intel-hud[data-variant='cyber'] .hud-bottom-left {
+  bottom: calc(2vh + 7.75rem);
+}
+
 #intel-hud[data-variant='cyber'] .hud-corner {
   position: fixed;
   isolation: isolate;
@@ -1493,12 +1684,21 @@
 
 /* Cyber also owns a distinct desktop composition. Existing components keep
    their controls and semantics, but move onto asymmetric mission-deck rails. */
+@media (min-width: 961px) and (max-height: 649px) {
+  /* The compact-height layout drops the desktop rail composition one pixel
+     below its 650px threshold. Keep the left rail inside the same telemetry
+     and attribution-safe floor while its panel bodies take over scrolling. */
+  :root[data-ui-theme='cyber'] #left-panel-stack {
+    bottom: calc(2vh + 13rem);
+  }
+}
+
 @media (min-width: 961px) and (min-height: 650px) {
   :root[data-ui-theme='cyber'] {
     /* Compose the upper mission card and both panel rails as one compact lane.
        The shared rail anchor keeps expanded left/right panels aligned. */
     --cyber-hud-card-top: max(100px, 10.25vh);
-    --cyber-left-rail-top: max(252px, calc(var(--cyber-hud-card-top) + 146px));
+    --cyber-left-rail-top: max(220px, calc(var(--cyber-hud-card-top) + 120px));
   }
 
   /* Keep the rotated COLL / ONA telemetry in the upper clearance lane. Its
@@ -1510,7 +1710,7 @@
 
   :root[data-ui-theme='cyber'] #left-panel-stack {
     top: var(--cyber-left-rail-top) !important;
-    bottom: calc(2vh + 11rem);
+    bottom: calc(2vh + 13rem);
     left: 54px;
     width: 300px;
     padding-left: 10px;
@@ -1708,12 +1908,6 @@
   #intel-hud[data-variant='cyber'] .hud-bottom-right {
     right: 28px;
     bottom: 28px;
-  }
-
-  /* Match the lower telemetry cards by their top edge while leaving the
-     shorter coordinate card clear of Cesium attribution. */
-  #intel-hud[data-variant='cyber'] .hud-bottom-left {
-    bottom: 60px;
   }
 }
 

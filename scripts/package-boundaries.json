@@ -1271,8 +1271,13 @@
       "src/voice/layerSummary.js",
       "src/voice/voiceCost.js",
       "src/voice/commands.js",
+      "src/voice/providerCommands.js",
+      "src/voice/geminiSession.js",
+      "src/voice/geminiAudio.js",
+      "src/voice/geminiCaptureWorklet.js",
       "src/voice/session.js",
       "src/voice/sessionCommands.js",
+      "src/voice/inactivity.js",
       "src/voice/realtimeSession.js",
       "src/voice/realtimeEvents.js",
       "src/voice/realtimePreferences.js",
@@ -1849,6 +1854,10 @@
       "src/ui/visualPresets.js",
       "src/ui/visualSettings.js",
       "src/voice/commands.js",
+      "src/voice/providerCommands.js",
+      "src/voice/geminiSession.js",
+      "src/voice/geminiAudio.js",
+      "src/voice/geminiCaptureWorklet.js",
       "src/voice/control.js",
       "src/voice/gevActions.js",
       "src/voice/gevRealtime.js",
@@ -1880,6 +1889,7 @@
       "src/search/presetGeocoder.js",
       "src/voice/session.js",
       "src/voice/sessionCommands.js",
+      "src/voice/inactivity.js",
       "src/voice/realtimeSession.js",
       "src/voice/realtimeEvents.js",
       "src/app/localGeojsonServices.js",
@@ -2749,7 +2759,8 @@
     "modules": [
       "src/voice/sessionCommands.js",
       "src/voice/session.js",
-      "src/voice/control.js"
+      "src/voice/control.js",
+      "src/voice/inactivity.js"
     ],
     "external": []
   },
